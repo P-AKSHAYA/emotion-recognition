@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <link rel="stylesheet" href="static/style.css">
+    <script>
+        function predictEmotion(event) {
+            event.preventDefault();
+            let formData = new FormData(document.getElementById("emotionForm"));
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerHTML = "<span style='color: red;'>" + data.error + "</span>";
+                } else {
+                    document.getElementById("result").innerHTML = "Detected Emotion: " + data.emotion;
+                    
+                    let emotionImages = {
+    "Happy": "static/emotions/happy.jpg",
+    "Sad": "/static/emotions/sad.jpg",
+    "Angry": "/static/emotions/angry.jpg",
+    "Relaxed": "/static/emotions/relaxed.jpg",
+    "Anxious": "/static/emotions/anxious.jpg",
+    "Irritable": "/static/emotions/irritable.jpg",
+    "Neutral": "/static/emotions/neutral.jpg"
+};
+
+
+
+                    // Update the left section with the detected emotion image
+                    let emotionKey = data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1).toLowerCase();
+document.getElementById("left-section").innerHTML = `<img src="${emotionImages[emotionKey]}" class="emotion-img">`;
+
+                    // Hide the form and show result section
+                    document.getElementById("form-section").style.display = "none";
+                    document.getElementById("result-section").style.display = "block";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function tryAgain() {
+            // Reset back to initial form
+            document.getElementById("left-section").innerHTML = "<h2>Emotion Detection</h2>";
+            document.getElementById("form-section").style.display = "block";
+            document.getElementById("result-section").style.display = "none";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section" id="left-section">
+            <h2>Emotion Detection</h2>
+        </div>
+        <div class="right-section">
+            <div id="form-section">
+                <form id="emotionForm" onsubmit="predictEmotion(event)">
+                    <label>Heart Rate:</label>
+                    <input type="number" step="any" name="heart_rate" min="40" max="180" required><br><br>
+
+                    <label>Skin Temperature:</label>
+                    <input type="number" step="any" name="skin_temp" min="30" max="40" required><br><br>
+
+                    <label>Galvanic Skin Response:</label>
+                    <input type="number" step="any" name="gsr" min="0.01" max="10" required><br><br>
+
+                    <label>Respiration Rate:</label>
+                    <input type="number" step="any" name="respiration_rate" min="8" max="40" required><br><br>
+
+                    <button type="submit">Detect Emotion</button>
+                </form>
+            </div>
+
+            <div id="result-section" style="display: none;">
+                <h3 id="result"></h3>
+                <button onclick="tryAgain()">Try Again</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
